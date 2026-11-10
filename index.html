@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trade">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#0b0e14">
+<meta name="description" content="Trade Assistant Dashboard, snapshot locale in modalità demo.">
+<title>Trade Assistant Dashboard</title>
+<style>
+:root{
+  --bg:#0b0e14;
+  --bg2:#0e1219;
+  --panel:#12161f;
+  --panel2:#171c27;
+  --ink:#e7ecf3;
+  --muted:#8b95a7;
+  --dim:#5d6678;
+  --line:#232a38;
+  --line2:#2c3446;
+  --blue:#4c8dff;
+  --blue-2:#1a3a73;
+  --green:#3ecf8e;
+  --green-2:#163828;
+  --red:#f0616d;
+  --red-2:#3a151c;
+  --amber:#f0b429;
+  --amber-2:#3a2c0e;
+  --purple:#8b7cf7;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+  --tab-h:58px;
+  --radius:12px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg);color:var(--ink);scroll-behavior:smooth}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden}
+body{
+  font-family:var(--sans);
+  font-size:14px;
+  line-height:1.45;
+  background:radial-gradient(1200px 500px at 50% -80px,#152038 0%,var(--bg) 58%);
+  padding-top:var(--safe-t);
+  padding-bottom:calc(var(--tab-h) + var(--safe-b) + 12px);
+  padding-left:var(--safe-l);
+  padding-right:var(--safe-r);
+}
+a{color:var(--blue);text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.num,td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-feature-settings:"tnum";letter-spacing:-0.01em}
+.wrap{width:100%;max-width:1180px;margin:0 auto;padding:8px 12px 20px}
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(11,14,20,.92);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+.top-inner{max-width:1180px;margin:0 auto;padding:8px 12px 10px}
+.brand-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.logo{
+  width:28px;height:28px;border-radius:8px;flex:0 0 auto;
+  background:linear-gradient(180deg,#2a508a,#16325c);
+  border:1px solid #3a6cbc;
+  display:grid;place-items:center;
+}
+.brand{display:flex;flex-direction:column;gap:0;min-width:0}
+.brand h1{margin:0;font-size:15px;font-weight:650;letter-spacing:.01em}
+.brand .sub{color:var(--muted);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-left:auto}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border-radius:999px;padding:4px 8px;border:1px solid var(--line2);color:var(--muted);
+  white-space:nowrap;background:var(--panel);
+}
+.pill.demo{color:var(--green);border-color:#2a6b4e;background:#10261c}
+.pill.mode-manual{color:#b9d2ff;border-color:#2d4d86;background:#132033}
+.pill.mode-auto{color:var(--amber);border-color:#7a5a14;background:var(--amber-2)}
+.pill.safe{color:#d5dce8;border-color:var(--line2)}
+.pill.warn{color:var(--amber);border-color:#7a5a14;background:var(--amber-2)}
+.pill.mute{color:var(--muted)}
+.meta-row{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:6px;color:var(--muted);font-size:11px}
+.meta-row .safety{color:#d5dce8;font-weight:650;letter-spacing:.04em;text-transform:uppercase;font-size:10px}
+.meta-row .stamp{font-family:var(--mono);color:var(--ink)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--dim);flex:0 0 auto}
+.dot.ok{background:var(--green);box-shadow:0 0 0 3px rgba(62,207,142,.15)}
+.dot.warn{background:var(--amber);box-shadow:0 0 0 3px rgba(240,180,41,.16)}
+.dot.wait{background:var(--blue);box-shadow:0 0 0 3px rgba(76,141,255,.16)}
+.dot.bad{background:var(--red)}
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  display:flex;justify-content:space-around;
+  background:rgba(11,14,20,.94);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);
+  padding:4px 2px calc(4px + var(--safe-b));
+  height:calc(var(--tab-h) + var(--safe-b));
+}
+.tabbar a{
+  flex:1 1 0;min-width:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  color:var(--muted);font-size:9px;font-weight:600;letter-spacing:.02em;
+  text-decoration:none;padding:4px 2px;
+}
+.tabbar a svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tabbar a.on,.tabbar a[aria-current="page"]{color:var(--blue)}
+section{scroll-margin-top:86px;margin:14px 0 18px}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 8px;flex-wrap:wrap}
+.sec-head h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sec-head .hint{color:var(--dim);font-size:11px}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px;
+}
+.card + .card{margin-top:10px}
+.grid-2{display:grid;gap:10px;grid-template-columns:1fr}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.metric{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 10px 9px;min-width:0}
+.metric .lbl{display:block;color:var(--dim);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.metric .val{font-family:var(--mono);font-size:18px;font-weight:650;letter-spacing:-0.03em;line-height:1.15;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.metric .val.sm{font-size:15px}
+.metric .val.zero{color:var(--muted)}
+.metric .val.up{color:var(--green)}
+.metric .val.down{color:var(--red)}
+.metric .val.warn{color:var(--amber)}
+.spark-card{padding:10px 12px 8px}
+.spark-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px}
+.spark-head .lbl{color:var(--dim);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.spark-head .lvl{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.spark-card svg{display:block;width:100%;height:74px}
+.mode-grid{display:grid;gap:10px}
+.mode-opt{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2);color:var(--muted)}
+.mode-opt.on{border-color:#2d4d86;background:#132033;color:var(--ink)}
+.mode-opt.on.auto{border-color:#7a5a14;background:var(--amber-2)}
+.mode-opt .k{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;color:inherit}
+.mode-opt.on .k{color:#b9d2ff}
+.mode-opt.on.auto .k{color:var(--amber)}
+.mode-now{margin-top:10px;font-size:13px;color:var(--ink)}
+.mode-now strong{font-weight:650}
+.banner{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  border-radius:10px;padding:9px 11px;margin:0 0 12px;
+  border:1px solid #7a5a14;background:var(--amber-2);color:var(--amber);
+  font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:13px
+}
+.banner .sub{font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink);font-size:12px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13px}
+.kv .k{color:var(--muted)}
+.kv .v{color:var(--ink);min-width:0;overflow-wrap:anywhere}
+.plan{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.plan h3{margin:0 0 8px;font-size:13px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{border:1px solid var(--line2);border-radius:8px;padding:6px 8px;background:var(--bg2);min-width:0}
+.chip .k{display:block;color:var(--dim);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.chip .v{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.chip.sl .v{color:var(--red)}
+.chip.tp .v{color:var(--green)}
+.chip.entry .v{color:var(--blue)}
+.ladder-wrap{display:flex;justify-content:center;padding:4px 0}
+.ladder-wrap svg{width:100%;max-width:280px;height:auto;display:block}
+.note{color:var(--muted);font-size:12px;margin:8px 0 0}
+.warn-text{color:var(--amber)}
+.pipeline{display:flex;flex-direction:column;gap:0;position:relative}
+.pipe-step{position:relative;display:flex;gap:10px;padding:0 0 14px 0}
+.pipe-rail{width:16px;flex:0 0 16px;position:relative}
+.pipe-rail .dot{position:absolute;top:6px;left:4px;z-index:1}
+.pipe-rail i{
+  position:absolute;left:7px;top:16px;bottom:-6px;width:2px;background:var(--line2);border-radius:1px
+}
+.pipe-step:last-child{padding-bottom:0}
+.pipe-step:last-child .pipe-rail i{display:none}
+.pipe-body{flex:1 1 auto;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.pipe-body.warn{border-color:#7a5a14;background:#1a160c}
+.pipe-body.wait{border-color:#2d4d86;background:#10192b}
+.pipe-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.pipe-name{font-weight:650;font-size:13px}
+.pipe-id{color:var(--dim);font-family:var(--mono);font-size:11px;margin-right:6px}
+.st{
+  font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  border-radius:999px;padding:2px 7px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap
+}
+.st.ok{color:var(--green);border-color:#2a6b4e;background:#10261c}
+.st.warn{color:var(--amber);border-color:#7a5a14;background:var(--amber-2)}
+.st.wait{color:#b9d2ff;border-color:#2d4d86;background:#132033}
+.st.bad{color:var(--red);border-color:#7a3038;background:var(--red-2)}
+.st.off{color:var(--muted);border-color:var(--line2);background:transparent}
+.pipe-body p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;max-width:100%;margin:0 -4px;padding:0 4px}
+.scroll table{width:100%;border-collapse:collapse;min-width:560px}
+table.compact{min-width:520px}
+table.wide{min-width:720px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;font-size:12px;vertical-align:middle}
+th{color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+td.num,th.num{text-align:right}
+tr:last-child td{border-bottom:0}
+tr.hi td{background:rgba(76,141,255,.08)}
+tr.off td{color:var(--dim)}
+tr.hi td:first-child{box-shadow:inset 3px 0 0 var(--blue)}
+.up{color:var(--green)}
+.down{color:var(--red)}
+.foot{color:var(--dim);font-size:11px;margin:8px 0 0;line-height:1.4}
+.empty{
+  display:flex;align-items:center;gap:10px;
+  color:var(--muted);padding:16px 8px;font-size:13px
+}
+.empty .mark{
+  width:32px;height:32px;border-radius:8px;border:1px dashed var(--line2);
+  display:grid;place-items:center;color:var(--dim);flex:0 0 auto;font-size:16px
+}
+.empty .t{color:var(--ink);font-weight:650;display:block}
+.empty .d{color:var(--dim);font-size:12px}
+.event{display:grid;grid-template-columns:92px 1fr;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.event:last-child{border-bottom:0}
+.event .when{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.event .what{min-width:0}
+.event .what b{display:block;font-size:13px;font-weight:650}
+.event .what span{color:var(--muted);font-size:12px}
+.ex-list{display:grid;gap:8px}
+.ex{display:grid;gap:4px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.ex .row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ex .name{font-weight:650}
+.ex .meta{color:var(--muted);font-size:12px}
+.risk-row{display:grid;grid-template-columns:1fr;gap:8px}
+.risk-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--panel2)}
+.risk-item .k{color:var(--dim);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.risk-item .v{margin-top:4px;font-family:var(--mono);font-size:16px}
+.risk-item.todo .v{color:var(--amber)}
+.disclaimer{
+  margin:22px 0 8px;padding:12px;
+  border:1px solid var(--line);border-radius:10px;
+  color:var(--muted);font-size:11px;line-height:1.5
+}
+.cand{display:inline-block;margin-left:6px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);border:1px solid #2d4d86;border-radius:999px;padding:1px 6px;vertical-align:middle}
+
+@media(min-width:720px){
+  .metrics{grid-template-columns:repeat(4,1fr)}
+  .kv{grid-template-columns:140px 1fr}
+  .risk-row{grid-template-columns:repeat(3,1fr)}
+  .mode-grid{grid-template-columns:1fr 1fr}
+  .event{grid-template-columns:130px 1fr}
+}
+@media(min-width:900px){
+  body{padding-bottom:24px}
+  .wrap{padding:12px 20px 32px}
+  .top-inner{padding:10px 20px 12px}
+  .metric .val{font-size:20px}
+  .metrics-row{display:grid;grid-template-columns:1fr 300px;gap:10px;align-items:stretch}
+  .analysis-grid{display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start}
+  .tabbar{
+    position:sticky;top:62px;bottom:auto;height:auto;
+    justify-content:flex-start;gap:4px;
+    padding:6px 20px;max-width:1180px;margin:0 auto;
+    border-top:0;border-bottom:1px solid var(--line);
+    background:rgba(11,14,20,.92);
+  }
+  .tabbar a{flex:0 0 auto;flex-direction:row;gap:6px;font-size:12px;padding:6px 10px;border-radius:8px}
+  .tabbar a.on,.tabbar a[aria-current="page"]{background:#132033}
+  section{scroll-margin-top:128px}
+  .pipeline{flex-direction:row;align-items:stretch;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .pipe-step{flex:1 1 0;min-width:150px;padding:0;display:flex;flex-direction:row;align-items:stretch}
+  .pipe-rail{width:18px;flex:0 0 18px}
+  .pipe-rail .dot{top:18px;left:0}
+  .pipe-rail i{
+    left:auto;right:-2px;top:21px;bottom:auto;width:calc(100% + 8px);height:2px;
+    background:var(--line2)
+  }
+  .pipe-step:last-child .pipe-rail i{display:none}
+  .pipe-step:last-child .pipe-rail{display:none}
+  .pipe-step:first-child .pipe-rail{display:none}
+  .pipe-body{margin-right:0;padding:8px 9px}
+  .pipe-body p{font-size:11px}
+  .pipe-top{flex-wrap:wrap;gap:4px}
+}
+
+@media(min-width:1100px){
+  .metrics{grid-template-columns:repeat(4,1fr)}
+}
+
+.scroll-hint{display:block;color:var(--dim);font-size:10px;letter-spacing:.06em;text-transform:uppercase;text-align:right;margin:0 0 6px}
+.strat-cards{display:flex;flex-direction:column;gap:8px}
+.s-card{display:grid;grid-template-columns:28px 1fr auto;gap:2px 10px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.s-card.off{opacity:.58}
+.s-card.hi{border-color:#2d4d86;background:#132033}
+.s-card .id{font-family:var(--mono);color:var(--muted);font-weight:700}
+.s-card .nm{font-weight:650;min-width:0}
+.s-card .meta{grid-column:2 / -1;color:var(--muted);font-size:11px}
+.strat-table-wrap{display:none}
+@media(min-width:800px){
+  .strat-cards{display:none}
+  .strat-table-wrap{display:block}
+  .scroll-hint{display:none}
+}
+@media(max-width:899px){
+  .topbar{position:relative}
+  .pills{flex-basis:100%;margin-left:0;margin-top:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .pills::-webkit-scrollbar{display:none}
+  .meta-row{font-size:10px}
+  section{scroll-margin-top:12px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="top-inner">
+    <div class="brand-row">
+      <div class="logo"><svg viewBox="0 0 28 28" width="18" height="18" aria-hidden="true"><path d="M7 19V9l7 10 7-10v10" fill="none" stroke="#cfe1ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="brand">
+        <h1>Trade Assistant</h1>
+        <div class="sub">Kronos · Paper trading</div>
+      </div>
+      <div class="pills">
+        <span class="pill demo"><span class="dot ok"></span>Demo</span>
+        <span class="pill mode-auto">MODALITÀ AUTONOMA</span>
+        <span class="pill mute">Nessun exchange collegato</span>
+      </div>
+    </div>
+    <div class="meta-row">
+      <span class="safety">Conferma obbligatoria · SL obbligatorio</span>
+      <span>Aggiornamento dati: <span class="stamp">10/11/2026 06:29 UTC</span></span>
+      <span>File generato: <span class="stamp">10/11/2026 06:55 UTC</span></span>
+      <span>Fonte prezzo: Binance · snapshot, non live</span>
+    </div>
+  </div>
+</header>
+<nav class="tabbar" aria-label="Sezioni">
+<a href="#overview" class="on" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Overview</a><a href="#agents"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.3"/><circle cx="12" cy="6" r="2.3"/><circle cx="18" cy="12" r="2.3"/><circle cx="12" cy="18" r="2.3"/><path d="M8 11l2.2-3M16 11l-2.2-3M8 13l2.2 3M16 13l-2.2 3"/></svg>Agents</a><a href="#strategie"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 12h16M4 16h16"/><path d="M8 6v4M12 10v4M16 14v4"/></svg>Strategie</a><a href="#posizioni"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 11H6L5 8z"/><path d="M9 8V6.5A3 3 0 0 1 15 6.5V8"/></svg>Posizioni</a><a href="#storico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/></svg>Storico</a><a href="#exchange"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V5h10v3"/><rect x="5" y="8" width="14" height="10" rx="2"/><path d="M9 13h6"/></svg>Exchange</a>
+</nav>
+<main class="wrap">
+
+<section id="overview">
+  <div class="sec-head"><h2>Overview</h2><div class="hint">Conto demo · nessun ordine reale</div></div>
+  <div class="metrics-row">
+    <div class="metrics"><div class="metric"><span class="lbl">Equity demo</span><div class="val zero">$10.000,00</div></div><div class="metric"><span class="lbl">Cash</span><div class="val">$10.000,00</div></div><div class="metric"><span class="lbl">P&amp;L realizzato</span><div class="val zero">$0,00</div></div><div class="metric"><span class="lbl">P&amp;L non realizzato</span><div class="val zero">$0,00</div></div><div class="metric"><span class="lbl">Posizioni aperte</span><div class="val sm zero">0</div></div><div class="metric"><span class="lbl">Drawdown</span><div class="val zero">0,00%</div></div><div class="metric"><span class="lbl">Piani in attesa</span><div class="val sm warn">1</div></div><div class="metric"><span class="lbl">Esposizione</span><div class="val zero">0,00%</div></div></div>
+    <div class="card spark-card">
+      <div class="spark-head"><span class="lbl">Equity demo</span><span class="lvl num">$10.000,00</span></div>
+      <svg viewBox="0 0 300 74" role="img" aria-label="Equity demo, linea piatta a $10.000,00">
+  <line x1="6" y1="29.8" x2="294" y2="29.8" stroke="#232a38" stroke-width="1" stroke-dasharray="3 4"/>
+  <line x1="14" y1="29.8" x2="286" y2="29.8" stroke="#3ecf8e" stroke-width="2"/>
+  <circle cx="14" cy="29.8" r="3" fill="#3ecf8e"/>
+  <circle cx="286" cy="29.8" r="3" fill="#3ecf8e"/>
+  <text x="14" y="69" fill="#5d6678" font-size="9" font-family="ui-monospace,Menlo,monospace">10/11 05:56</text>
+  <text x="286" y="69" fill="#5d6678" font-size="9" font-family="ui-monospace,Menlo,monospace" text-anchor="end">10/11 06:55</text>
+</svg>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <div class="sec-head" style="margin-bottom:10px"><h2>Modalità operativa</h2></div>
+    <div class="mode-grid">
+      <div class="mode-opt "><span class="k">Manuale</span>Ogni analisi, segnale e ordine richiede conferma esplicita.</div>
+      <div class="mode-opt on auto"><span class="k">Autonoma</span>Analisi e paper trade demo in autonomia; ordini reali solo con conferma finale (o entro limiti pre-autorizzati, attualmente nessuno).</div>
+    </div>
+    <div class="mode-now">Stato attuale: <strong>Autonoma</strong>. Autorizzazioni autonome per ordini reali: nessuna.</div>
+    <div class='note'>Asset: BTC, ETH, SOL · Intervallo: ogni 1h · Ambito: solo demo · Strategie: 1–6</div>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <div class="sec-head"><h2>Ultima analisi · BTCUSDT</h2>
+      <div class="hint">10/11/2026 06:04 UTC · Binance</div>
+    </div>
+    <div class="banner"><span>Nessun trade ora</span><span class="sub">Trend ribassista + Range sui TF bassi</span></div>
+    <div class="analysis-grid">
+      <div>
+        <div class="kv">
+          <div class="k">Prezzo</div><div class="v num">74.790,01</div>
+          <div class="k">Regime</div><div class="v">Trend ribassista + Range sui TF bassi</div>
+          <div class="k">Strategia</div><div class="v">#1 Ichimoku Swing Master (più vicina, nessun trigger fresco)</div>
+          <div class="k">Verdetto</div><div class="v warn-text">NESSUN TRADE ORA</div>
+        </div>
+        <div class="plan">
+          <h3>Piano condizionato · Short di continuazione</h3>
+          <div class="kv">
+            <div class="k">Trigger</div><div class="v">Ritracciamento a Kijun 74.963–75.568 con Tenkan sotto Kijun, Chikou sotto, ADX 4h sopra 25</div>
+            <div class="k">Invalidazione</div><div class="v">Chiusura 4h sopra 75.568 e poi 76.250; oppure rottura di 73.510 senza ritracciamento.</div>
+          </div>
+          <div class="chips"><div class="chip "><span class="k">Direzione</span><span class="v">Short</span></div><div class="chip "><span class="k">Trigger</span><span class="v">Kijun 74.963–75.568</span></div><div class="chip entry"><span class="k">Entry</span><span class="v">74.963,12</span></div><div class="chip sl"><span class="k">Stop-loss</span><span class="v">77.212,01 (+3%)</span></div><div class="chip tp"><span class="k">Take-profit</span><span class="v">68.216,44 (−9%)</span></div><div class="chip "><span class="k">R/R</span><span class="v">3,00</span></div><div class="chip "><span class="k">Size demo</span><span class="v">0,02668 BTC</span></div><div class="chip "><span class="k">Nozionale</span><span class="v">$2.000</span></div><div class="chip "><span class="k">Rischio</span><span class="v">$60 (0,60%)</span></div></div>
+        </div>
+      </div>
+      <div class="ladder-wrap"><svg viewBox="0 0 280 440" role="img" aria-label="Scala dei livelli di prezzo BTCUSDT">
+<rect x="0" y="0" width="280" height="440" fill="#0e1219" rx="8"/>
+<rect x="58" y="43.4" width="160" height="13.5" fill="#8b7cf7" opacity="0.16"/>
+<rect x="72" y="170.1" width="12" height="235.8" fill="#3ecf8e" opacity="0.12"/>
+<rect x="72" y="91.5" width="12" height="78.6" fill="#f0616d" opacity="0.12"/>
+<line x1="78" y1="18" x2="78" y2="424" stroke="#2c3446" stroke-width="2"/>
+<text x="92" y="53.1" fill="#8b7cf7" font-size="10" font-family="-apple-system,sans-serif">Nuvola 78.202–78.590</text>
+<line x1="62" y1="91.5" x2="94" y2="91.5" stroke="#f0616d" stroke-width="2"/>
+<text x="94" y="95.0" fill="#f0616d" font-size="10.5" font-weight="700" font-family="ui-monospace,Menlo,monospace">SL 77.212,01</text>
+<line x1="69" y1="125.1" x2="87" y2="125.1" stroke="#8b95a7" stroke-width="1"/>
+<text x="94" y="128.6" fill="#8b95a7" font-size="10.5" font-weight="500" font-family="ui-monospace,Menlo,monospace">R 76.250</text>
+<line x1="69" y1="149.0" x2="87" y2="149.0" stroke="#8b95a7" stroke-width="1"/>
+<text x="94" y="152.5" fill="#8b95a7" font-size="10.5" font-weight="500" font-family="ui-monospace,Menlo,monospace">R 75.568</text>
+<line x1="62" y1="170.1" x2="94" y2="170.1" stroke="#4c8dff" stroke-width="2"/>
+<text x="94" y="173.6" fill="#4c8dff" font-size="10.5" font-weight="700" font-family="ui-monospace,Menlo,monospace">Entry 74.963,12</text>
+<line x1="62" y1="176.2" x2="94" y2="176.2" stroke="#e7ecf3" stroke-width="2"/>
+<circle cx="78" cy="176.2" r="3.6" fill="#e7ecf3"/>
+<path d="M 94 176.2 L 100 187.1" fill="none" stroke="#e7ecf3" stroke-width="0.8" opacity="0.7"/>
+<text x="94" y="190.6" fill="#e7ecf3" font-size="10.5" font-weight="700" font-family="ui-monospace,Menlo,monospace">Prezzo 74.790,01</text>
+<line x1="69" y1="193.6" x2="87" y2="193.6" stroke="#8b95a7" stroke-width="1"/>
+<path d="M 87 193.6 L 93 204.1" fill="none" stroke="#8b95a7" stroke-width="0.8" opacity="0.7"/>
+<text x="94" y="207.6" fill="#8b95a7" font-size="10.5" font-weight="500" font-family="ui-monospace,Menlo,monospace">S 74.290</text>
+<line x1="69" y1="212.5" x2="87" y2="212.5" stroke="#8b95a7" stroke-width="1"/>
+<path d="M 87 212.5 L 93 221.1" fill="none" stroke="#8b95a7" stroke-width="0.8" opacity="0.7"/>
+<text x="94" y="224.6" fill="#8b95a7" font-size="10.5" font-weight="500" font-family="ui-monospace,Menlo,monospace">S 73.750</text>
+<line x1="69" y1="220.9" x2="87" y2="220.9" stroke="#8b95a7" stroke-width="1"/>
+<path d="M 87 220.9 L 93 238.1" fill="none" stroke="#8b95a7" stroke-width="0.8" opacity="0.7"/>
+<text x="94" y="241.6" fill="#8b95a7" font-size="10.5" font-weight="500" font-family="ui-monospace,Menlo,monospace">S 73.510</text>
+<line x1="62" y1="405.9" x2="94" y2="405.9" stroke="#3ecf8e" stroke-width="2"/>
+<text x="94" y="409.4" fill="#3ecf8e" font-size="10.5" font-weight="700" font-family="ui-monospace,Menlo,monospace">TP 68.216,44</text>
+</svg></div>
+    </div>
+    <div class="sec-head" style="margin-top:16px"><h2>Indicatori per timeframe</h2></div>
+    <div class="scroll-hint">Scorri la tabella →</div>
+    <div class="scroll">
+      <table class="compact">
+        <thead><tr><th>TF</th><th class="num">RSI</th><th class="num">ADX</th><th class="num">MACD hist</th><th class="num">ATR%</th><th class="num">Vol/media</th></tr></thead>
+        <tbody><tr><td>D</td><td class="num">36,33</td><td class="num">20,64</td><td class="num down">−318,04</td><td class="num">2,91%</td><td class="num">1,08</td></tr><tr><td>4h</td><td class="num">42,13</td><td class="num">41,72</td><td class="num up">+24,92</td><td class="num">1,15%</td><td class="num">1,05</td></tr><tr><td>1h</td><td class="num">47,22</td><td class="num">12,40</td><td class="num down">−3,33</td><td class="num">0,58%</td><td class="num">0,56</td></tr><tr><td>30m</td><td class="num">47,08</td><td class="num">13,85</td><td class="num down">−32,36</td><td class="num">0,35%</td><td class="num">0,67</td></tr><tr><td>15m</td><td class="num">47,54</td><td class="num">13,47</td><td class="num up">+13,23</td><td class="num">0,23%</td><td class="num">0,61</td></tr><tr><td>5m</td><td class="num">48,88</td><td class="num">22,59</td><td class="num up">+5,45</td><td class="num">0,11%</td><td class="num">0,72</td></tr></tbody>
+      </table>
+    </div>
+    <div class="sec-head" style="margin-top:16px"><h2>Leva per broker · strategia #1 (nominale 3x)</h2></div>
+    <div class="scroll-hint">Scorri la tabella →</div>
+    <div class="scroll">
+      <table class="compact">
+        <thead><tr><th>Broker</th><th>Mercato</th><th class="num">Leva</th><th class="num">Margine</th><th class="num">Liquidazione</th></tr></thead>
+        <tbody><tr><td>Coinbase</td><td>spot</td><td class="num">1x</td><td class="num">$2.000</td><td class="num">—</td></tr><tr><td>Robinhood</td><td>spot</td><td class="num">1x</td><td class="num">$2.000</td><td class="num">—</td></tr><tr><td>eToro</td><td>crypto CFD</td><td class="num">2x</td><td class="num">$1.000</td><td class="num">—</td></tr><tr><td>Bybit</td><td>perp isolato</td><td class="num">3x</td><td class="num">$667</td><td class="num">99.576</td></tr></tbody>
+      </table>
+    </div>
+    <p class="foot">Leva effettiva = minimo tra strategia, exchange e limite utente. Size e rischio sono calcolati sul conto demo.</p>
+  </div>
+
+  <div class="card" style="margin-top:10px">
+    <div class="sec-head"><h2>Limiti di rischio</h2><div class="hint">Limiti utente attivi</div></div>
+    <div class="risk-row"><div class="risk-item"><div class="k">Rischio per trade</div><div class="v">0,50%</div></div><div class="risk-item"><div class="k">Max drawdown</div><div class="v">2,00%</div></div><div class="risk-item"><div class="k">Posizione massima</div><div class="v">5,00%</div></div></div>
+    <p class="note">Limiti utente in uso: rischio 0,50% per trade, drawdown massimo 2,00%, posizione massima 5,00%. R/R minimo 2. Il piano condizionato su BTCUSDT (06:04 UTC) usava un rischio effettivo di 0,60% con nozionale capato al 20%.</p>
+  </div>
+</section>
+
+<section id="agents">
+  <div class="sec-head"><h2>AI Agents · pipeline</h2>
+    <div class="hint">BTCUSDT · 10/11/2026 06:04 UTC</div>
+  </div>
+  <div class="pipeline"><div class="pipe-step"><div class="pipe-rail"><span class="dot ok"></span><i></i></div><div class="pipe-body ok"><div class="pipe-top"><div class="pipe-name"><span class="pipe-id">1</span>Sentiment/News</div><span class="st ok">Completato</span></div><p>Fear &amp; Greed 32 (Fear). CPI USA oggi alle 13:30 UTC. Deflussi ETF circa 201 mln $ (3° giorno). Chiusura settimanale più bassa da agosto.</p></div></div><div class="pipe-step"><div class="pipe-rail"><span class="dot ok"></span><i></i></div><div class="pipe-body ok"><div class="pipe-top"><div class="pipe-name"><span class="pipe-id">2</span>Analisi Tecnica</div><span class="st ok">Completato</span></div><p>Regime: Trend ribassista + Range sui TF bassi. ADX 4h 41,72 (−DI 27,3 / +DI 10,1). Prezzo sotto la nuvola Ichimoku 4h (78.202–78.590). EMA 9&lt;20&lt;50&lt;200 su 4h, 1h, 30m e 15m.</p></div></div><div class="pipe-step"><div class="pipe-rail"><span class="dot ok"></span><i></i></div><div class="pipe-body ok"><div class="pipe-top"><div class="pipe-name"><span class="pipe-id">3</span>Selettore strategia</div><span class="st ok">Completato</span></div><p>Più vicina: #1 Ichimoku Swing Master. Nessun trigger fresco: incrocio Tenkan/Kijun di 40 barre fa.</p></div></div><div class="pipe-step"><div class="pipe-rail"><span class="dot warn"></span><i></i></div><div class="pipe-body warn"><div class="pipe-top"><div class="pipe-name"><span class="pipe-id">4</span>Risk Management</div><span class="st warn">Parziale</span></div><p>FAIL ingresso immediato. PASS piano condizionato (SL obbligatorio, R/R 3,0, rischio 0,60%, leva capata, liquidazione Bybit circa 99.576 oltre lo SL).</p></div></div><div class="pipe-step"><div class="pipe-rail"><span class="dot wait"></span><i></i></div><div class="pipe-body wait"><div class="pipe-top"><div class="pipe-name"><span class="pipe-id">5</span>Execution</div><span class="st wait">In attesa</span></div><p>Nessun ordine. In attesa del trigger e della conferma utente.</p></div></div><div class="pipe-step"><div class="pipe-rail"><span class="dot ok"></span><i></i></div><div class="pipe-body ok"><div class="pipe-top"><div class="pipe-name"><span class="pipe-id">6</span>Demo/Paper</div><span class="st ok">Completato</span></div><p>Analisi registrata nello storico. Saldo invariato.</p></div></div></div>
+</section>
+
+<section id="strategie">
+  <div class="sec-head"><h2>Strategie master Kronos</h2><div class="hint">10 preset · 6 attive · 4 off</div></div>
+  <div class="card">
+    <div class="strat-cards"><div class="s-card hi"><div class="id">1</div><div class="nm">Ichimoku Swing Master</div><span class="st ok">Attiva</span><div class="meta">4h · Trend · leva 3x · WR 75% · candidata attuale BTCUSDT</div></div><div class="s-card "><div class="id">2</div><div class="nm">Golden Cross Trend</div><span class="st ok">Attiva</span><div class="meta">1h · Trend · leva 5x · WR 73%</div></div><div class="s-card "><div class="id">3</div><div class="nm">Multi-Indicator Confluence</div><span class="st ok">Attiva</span><div class="meta">30m · Trend/Range · leva 8x · WR 72%</div></div><div class="s-card "><div class="id">4</div><div class="nm">Volatility Squeeze Breakout</div><span class="st ok">Attiva</span><div class="meta">15m · Breakout · leva 10x · WR 70%</div></div><div class="s-card "><div class="id">5</div><div class="nm">VWAP Institutional Flow</div><span class="st ok">Attiva</span><div class="meta">15m · Trend intraday · leva 12x · WR 69%</div></div><div class="s-card "><div class="id">6</div><div class="nm">Momentum Breakout Hunter</div><span class="st ok">Attiva</span><div class="meta">5m · Breakout · leva 15x · WR 68%</div></div><div class="s-card off"><div class="id">7</div><div class="nm">Scalp Precision Engine</div><span class="st off">OFF</span><div class="meta">5m · Range · leva 20x · WR 65%</div></div><div class="s-card off"><div class="id">8</div><div class="nm">Stoch-RSI Momentum</div><span class="st off">OFF</span><div class="meta">3m · Volatile · leva 25x · WR 64%</div></div><div class="s-card off"><div class="id">9</div><div class="nm">Order Flow Scalper</div><span class="st off">OFF</span><div class="meta">1m · Range/Volatile · leva 30x · WR 61%</div></div><div class="s-card off"><div class="id">10</div><div class="nm">HFT Micro-Scalp</div><span class="st off">OFF</span><div class="meta">1m · Volatile · leva 50x · WR 59%</div></div></div>
+    <div class="strat-table-wrap">
+      <div class="scroll">
+        <table class="wide">
+          <thead>
+            <tr>
+              <th class="num">#</th><th>Nome</th><th>TF</th><th>Regime</th>
+              <th class="num">Leva Kronos</th><th class="num">Win rate dich.</th><th>Stato</th>
+            </tr>
+          </thead>
+          <tbody><tr class="hi"><td class="num">1</td><td>Ichimoku Swing Master<span class="cand">Candidata attuale BTCUSDT</span></td><td>4h</td><td>Trend</td><td class="num">3x</td><td class="num">75%</td><td><span class="st ok">Attiva</span></td></tr><tr class=""><td class="num">2</td><td>Golden Cross Trend</td><td>1h</td><td>Trend</td><td class="num">5x</td><td class="num">73%</td><td><span class="st ok">Attiva</span></td></tr><tr class=""><td class="num">3</td><td>Multi-Indicator Confluence</td><td>30m</td><td>Trend/Range</td><td class="num">8x</td><td class="num">72%</td><td><span class="st ok">Attiva</span></td></tr><tr class=""><td class="num">4</td><td>Volatility Squeeze Breakout</td><td>15m</td><td>Breakout</td><td class="num">10x</td><td class="num">70%</td><td><span class="st ok">Attiva</span></td></tr><tr class=""><td class="num">5</td><td>VWAP Institutional Flow</td><td>15m</td><td>Trend intraday</td><td class="num">12x</td><td class="num">69%</td><td><span class="st ok">Attiva</span></td></tr><tr class=""><td class="num">6</td><td>Momentum Breakout Hunter</td><td>5m</td><td>Breakout</td><td class="num">15x</td><td class="num">68%</td><td><span class="st ok">Attiva</span></td></tr><tr class="off"><td class="num">7</td><td>Scalp Precision Engine</td><td>5m</td><td>Range</td><td class="num">20x</td><td class="num">65%</td><td><span class="st off">OFF</span></td></tr><tr class="off"><td class="num">8</td><td>Stoch-RSI Momentum</td><td>3m</td><td>Volatile</td><td class="num">25x</td><td class="num">64%</td><td><span class="st off">OFF</span></td></tr><tr class="off"><td class="num">9</td><td>Order Flow Scalper</td><td>1m</td><td>Range/Volatile</td><td class="num">30x</td><td class="num">61%</td><td><span class="st off">OFF</span></td></tr><tr class="off"><td class="num">10</td><td>HFT Micro-Scalp</td><td>1m</td><td>Volatile</td><td class="num">50x</td><td class="num">59%</td><td><span class="st off">OFF</span></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="foot">I win rate sono quelli dichiarati da Kronos e non sono stati verificati. La leva effettiva è il minimo tra strategia, exchange e limite utente. Le strategie 7–10 restano disattivate finché non le abiliti tu.</p>
+  </div>
+</section>
+
+<section id="posizioni">
+  <div class="sec-head"><h2>Posizioni aperte</h2></div>
+  <div class="card">
+    <div class="empty"><div class="mark">○</div>
+      <div><span class="t">Nessuna posizione aperta</span>
+      <span class="d">Il conto demo è interamente liquido. Nessuna esposizione in essere.</span></div>
+    </div></div>
+  <div class="sec-head" style="margin-top:16px"><h2>Ordini / fill</h2></div>
+  <div class="card">
+    <div class="empty"><div class="mark">○</div>
+      <div><span class="t">Nessun fill: nessun ordine eseguito</span>
+      <span class="d">Non risultano ordini inviati, né in demo né su exchange.</span></div>
+    </div></div>
+</section>
+
+<section id="storico">
+  <div class="sec-head"><h2>Storico eventi</h2><div class="hint">Dal più recente</div></div>
+  <div class="card"><div class="event"><div class="when">10/11 06:29</div><div class="what"><b>Config</b><span>Autonoma attiva solo in demo: rischio 0,5%, DD giornaliero 2%, posizione max 5%, BTC, ETH, SOL, ogni 1h, strategie 1-6</span></div></div><div class="event"><div class="when">10/11 06:28</div><div class="what"><b>Config</b><span>Modalità autonoma attivata; in attesa parametri di rischio</span></div></div><div class="event"><div class="when">10/11 06:27</div><div class="what"><b>Config</b><span>Aggiunte modalità manuale/autonoma; attiva: manuale</span></div></div><div class="event"><div class="when">10/11 06:04</div><div class="what"><b>Analisi</b><span>Analisi BTCUSDT: nessun trade, piano condizionato</span></div></div><div class="event"><div class="when">10/11 06:00</div><div class="what"><b>Config</b><span>Strategie allineate a Kronos; 9 e 10 disattivate di default</span></div></div><div class="event"><div class="when">10/11 05:56</div><div class="what"><b>Setup</b><span>Conto demo creato con 10.000 $ virtuali</span></div></div></div>
+</section>
+
+<section id="exchange">
+  <div class="sec-head"><h2>Connection Exchange</h2><div class="hint">Nessun exchange collegato</div></div>
+  <div class="ex-list"><div class="ex"><div class="row"><div class="name">eToro</div><span class="st off">Non collegato</span></div><div class="meta">Connessione: connettore diretto</div><div class="meta">Leva crypto max: <span class="num">2x</span></div></div><div class="ex"><div class="row"><div class="name">Coinbase</div><span class="st off">Non collegato</span></div><div class="meta">Connessione: connettore diretto</div><div class="meta">Leva crypto max: <span class="num">1x spot</span></div></div><div class="ex"><div class="row"><div class="name">Robinhood</div><span class="st off">Non collegato</span></div><div class="meta">Connessione: connettore diretto</div><div class="meta">Leva crypto max: <span class="num">1x</span></div></div><div class="ex"><div class="row"><div class="name">Webull</div><span class="st off">Non collegato</span></div><div class="meta">Connessione: connettore diretto · Sola lettura.</div><div class="meta">Leva crypto max: <span class="num">nessun ordine</span></div></div><div class="ex"><div class="row"><div class="name">Bybit</div><span class="st off">Non collegato</span></div><div class="meta">Connessione: chiave API manuale · All&#x27;inizio solo lettura. Non abilitare mai il prelievo. Whitelist IP. Margine isolato sui perpetui.</div><div class="meta">Leva crypto max: <span class="num">spot 1x, perp isolato</span></div></div></div>
+</section>
+
+<aside class="disclaimer">
+  Il trading comporta il rischio di perdere il capitale investito. Nessun risultato è garantito e nessun ordine viene inviato senza conferma esplicita. Ogni posizione deve avere uno stop-loss. Questo file è uno snapshot autonomo, non un feed in tempo reale, e non dipende da risorse esterne.
+</aside>
+</main>
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll(".tabbar a"));
+  var map=tabs.map(function(a){
+    var id=(a.getAttribute("href")||"").replace("#","");
+    return {a:a,el:document.getElementById(id)};
+  }).filter(function(x){return x.el});
+  function setOn(active){
+    tabs.forEach(function(t){
+      var on=t===active;
+      t.classList.toggle("on",on);
+      if(on) t.setAttribute("aria-current","page");
+      else t.removeAttribute("aria-current");
+    });
+  }
+  tabs.forEach(function(a){
+    a.addEventListener("click",function(e){
+      var id=(a.getAttribute("href")||"").replace("#","");
+      var el=document.getElementById(id);
+      if(!el) return;
+      e.preventDefault();
+      el.scrollIntoView({behavior:"smooth",block:"start"});
+      setOn(a);
+      if(history.replaceState) history.replaceState(null,"",a.getAttribute("href"));
+    });
+  });
+  if("IntersectionObserver" in window && map.length){
+    var io=new IntersectionObserver(function(entries){
+      var vis=entries.filter(function(en){return en.isIntersecting})
+        .sort(function(a,b){return b.intersectionRatio-a.intersectionRatio})[0];
+      if(!vis) return;
+      var hit=map.filter(function(x){return x.el===vis.target})[0];
+      if(hit) setOn(hit.a);
+    },{rootMargin:"-25% 0px -55% 0px",threshold:[0.1,0.3,0.6]});
+    map.forEach(function(x){io.observe(x.el)});
+  }
+  document.querySelectorAll("[data-toggle]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var t=document.getElementById(btn.getAttribute("data-toggle"));
+      if(!t) return;
+      var open=t.hasAttribute("hidden");
+      if(open) t.removeAttribute("hidden"); else t.setAttribute("hidden","");
+      btn.setAttribute("aria-expanded",open?"true":"false");
+    });
+  });
+})();
+</script>
+</body>
+</html>
